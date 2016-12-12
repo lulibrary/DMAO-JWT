@@ -14,6 +14,10 @@ gem 'pg'
 gem 'activerecord'
 gem 'sinatra-activerecord'
 
+# Serializers
+
+gem 'sinatra-active-model-serializers'
+
 group :development, :test do
   gem 'byebug'
 end
