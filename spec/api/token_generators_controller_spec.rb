@@ -161,4 +161,78 @@ describe TokenGeneratorsController do
 
   end
 
+  it "returns 404 when generator id cannot be found for update" do
+    patch '/0'
+    assert_equal 404, last_response.status
+  end
+
+  it "returns 404 with error object when generator id cannot be found for update" do
+    patch '/0'
+    parsed_body = JSON.parse(last_response.body)
+    error_object = {"token_generator_id" => "No token generator found with id 0"}
+    assert_equal error_object, parsed_body["errors"]
+  end
+
+  it "returns 422 unprocessable when invalid or empty attributes for token generator update" do
+
+    update_attributes = {
+        invalid_key: "testing"
+    }
+
+    patch "/#{@generator1.id}", update_attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 422, last_response.status
+
+  end
+
+  it "returns error message when invalid or empty attributes for token generator update" do
+
+    update_attributes = {
+        invalid_key: "testing"
+    }
+
+    error_object = {"message"=>"No data specified to update token generator with you can only update the following attributes [\"description\", \"token_ttl\", \"secret\"]"}
+
+    patch "/#{@generator1.id}", update_attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert_equal error_object, parsed_body["errors"]
+
+  end
+
+  it "returns 422 unprocessable with error message when unable to update token generator" do
+
+    update_attributes = {
+        description: 'Testing Generator 1 updated'
+    }
+
+    TokenGenerator.any_instance.expects(:update).once.returns(false)
+
+    patch "/#{@generator1.id}", update_attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert_equal 422, last_response.status
+    assert parsed_body["errors"]
+
+  end
+
+  it "returns 200 okay with token generator when successfully updating a token generator" do
+
+    update_attributes = {
+        description: 'Token Generator 1 updated'
+    }
+
+    patch "/#{@generator1.id}", update_attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert_equal 200, last_response.status
+    assert parsed_body["token_generator"]
+
+    assert_equal 'Token Generator 1 updated', parsed_body["token_generator"]["description"]
+
+  end
+
 end
