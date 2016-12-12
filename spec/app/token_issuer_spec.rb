@@ -53,6 +53,14 @@ describe TokenIssuer do
 
   end
 
+  it 'call issue token on instance of token issuer' do
+
+    TokenIssuer.any_instance.expects(:issue_token).once
+
+    TokenIssuer.issue @generator, {}, {}
+
+  end
+
   it 'calls generate token with no custom claims in payload when they are empty' do
 
     Time.expects(:now).at_least_once.returns('123456')
@@ -67,7 +75,7 @@ describe TokenIssuer do
         jti: 'abcd1234'
     }
 
-    TokenIssuer.expects(:generate_token).with(payload, 'abcdefg').once
+    TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
     TokenIssuer.issue @generator, {sub: 'test'}, {}
 
@@ -87,7 +95,7 @@ describe TokenIssuer do
         jti: 'abcd1234'
     }
 
-    TokenIssuer.expects(:generate_token).with(payload, 'abcdefg').once
+    TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
     TokenIssuer.issue @generator, {sub: 'test'}, nil
 
@@ -110,7 +118,7 @@ describe TokenIssuer do
         }
     }
 
-    TokenIssuer.expects(:generate_token).with(payload, 'abcdefg').once
+    TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
     TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}
 
