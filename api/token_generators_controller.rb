@@ -14,11 +14,7 @@ class TokenGeneratorsController < ApiController
 
   get '/:id' do
 
-    begin
-      generator = TokenGenerator.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      halt 404, json({errors: {token_generator_id: "No token generator found with id #{params[:id]}"}})
-    end
+    generator = find_generator_or_error params[:id]
 
     status 200
     json generator
@@ -51,11 +47,7 @@ class TokenGeneratorsController < ApiController
 
   patch '/:id' do
 
-    begin
-      generator = TokenGenerator.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      halt 404, json({errors: {token_generator_id: "No token generator found with id #{params[:id]}"}})
-    end
+    generator = find_generator_or_error params[:id]
 
     data = request_data
 
@@ -80,11 +72,7 @@ class TokenGeneratorsController < ApiController
 
   delete '/:id' do
 
-    begin
-      generator = TokenGenerator.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      halt 404, json({errors: {token_generator_id: "No token generator found with id #{params[:id]}"}})
-    end
+    generator = find_generator_or_error params[:id]
 
     if generator.destroy
       status 200
@@ -98,6 +86,14 @@ class TokenGeneratorsController < ApiController
   end
 
   private
+
+  def find_generator_or_error id
+    begin
+      TokenGenerator.find(id)
+    rescue ActiveRecord::RecordNotFound
+      halt 404, json({errors: {token_generator_id: "No token generator found with id #{id}"}})
+    end
+  end
 
   def request_data
 
