@@ -7,3 +7,7 @@ Dir.glob('./api/*.rb').each { |file| require file }
 map "/generators" do
   run TokenGeneratorsController
 end
+
+map "/" do
+  run TokenIssuingController
+end

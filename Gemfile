@@ -18,6 +18,10 @@ gem 'sinatra-activerecord'
 
 gem 'sinatra-active-model-serializers'
 
+# JWT
+
+gem 'jwt'
+
 group :development, :test do
   gem 'byebug'
 end
