@@ -4,7 +4,7 @@ class ApiToken < ActiveRecord::Base
 
   include RoleModel
 
-  roles :view_generator_details, :view_generator_secret
+  roles :view_generator_details, :view_generator_secret, :admin_generators
 
   validates :token, presence: true, uniqueness: true
 
