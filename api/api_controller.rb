@@ -25,4 +25,8 @@ class ApiController < JWTServiceApplication
     header.gsub(pattern, '') if header && header.match(pattern)
   end
 
+  def api_token
+    @api_token
+  end
+
 end
