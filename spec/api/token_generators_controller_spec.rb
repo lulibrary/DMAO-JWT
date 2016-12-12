@@ -94,4 +94,71 @@ describe TokenGeneratorsController do
 
   end
 
+  it 'returns created response when successfully creates a token generator' do
+
+    attributes = {
+      name: 'testing3',
+      description: 'Testing generator 3',
+      secret: SecureRandom.uuid,
+      token_ttl: 3600
+    }
+
+    post '/', attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 201, last_response.status
+
+  end
+
+  it 'returns token generator object when successfully creates a token generator' do
+
+    attributes = {
+        name: 'testing3',
+        description: 'Testing generator 3',
+        secret: SecureRandom.uuid,
+        token_ttl: 3600
+    }
+
+    post '/', attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generator"]
+
+    generator =  parsed_body["token_generator"]
+
+    assert_equal generator["name"], attributes[:name]
+    assert_equal generator["description"], attributes[:description]
+    assert_equal generator["token_ttl"], attributes[:token_ttl]
+
+    refute generator["secret"]
+
+  end
+
+  it 'returns 422 unprocessable with errors when trying to create generator with existing name' do
+
+    attributes = {
+        name: 'testing1',
+        description: 'Testing generator 1',
+        secret: SecureRandom.uuid,
+        token_ttl: 3600
+    }
+
+    post '/', attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 422, last_response.status
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+
+    errors =  parsed_body["errors"]
+
+    assert_equal errors.length, 1
+
+    assert errors["name"]
+
+    assert_equal errors["name"][0], "has already been taken"
+
+  end
+
 end
