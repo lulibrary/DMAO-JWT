@@ -11,11 +11,11 @@ class ApiController < JWTServiceApplication
 
   def validate_api_key
     api_key = get_bearer_token
-    halt 404, json({errors: {api_token: "No API key specified in authorization header"}}) unless api_key
+    halt 401, json({errors: {api_token: "No API key specified in authorization header"}}) unless api_key
     begin
       @api_token = ApiToken.find_by!(token: api_key)
     rescue ActiveRecord::RecordNotFound
-      halt 401, json({errors: {api_token: "Invalid API Token"}})
+      halt 403, json({errors: {api_token: "Invalid API Token"}})
     end
   end
 
