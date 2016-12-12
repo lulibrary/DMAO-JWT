@@ -22,6 +22,10 @@ gem 'sinatra-active-model-serializers'
 
 gem 'jwt'
 
+# For role based authorization
+
+gem 'role_model'
+
 group :development, :test do
   gem 'byebug'
 end
