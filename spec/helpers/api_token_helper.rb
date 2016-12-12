@@ -1,0 +1,13 @@
+require_relative '../../app/models/api_token'
+
+module ApiTokenHelper
+
+  def generate_api_token
+    ApiToken.create!(token: SecureRandom.uuid.tr('-', ''))
+  end
+
+  def add_api_header
+    header 'Authorization', "Bearer #{generate_api_token.token}"
+  end
+
+end

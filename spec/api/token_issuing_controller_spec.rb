@@ -4,10 +4,12 @@ require_relative '../../app/models/token_generator'
 require_relative '../../app/token_issuer'
 require_relative '../../app/errors/invalid_token_issuer_name'
 require_relative '../../app/errors/invalid_custom_claims_attr'
+require_relative '../helpers/api_token_helper'
 
 describe TokenIssuingController do
 
   include Rack::Test::Methods
+  include ApiTokenHelper
 
   before do
     @generator1 = TokenGenerator.create!(
@@ -22,6 +24,7 @@ describe TokenIssuingController do
         secret: SecureRandom.uuid,
         token_ttl: 60
     )
+    add_api_header
   end
 
   def app

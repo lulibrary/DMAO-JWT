@@ -1,10 +1,12 @@
 require 'spec_helper'
 require_relative '../../api/token_generators_controller'
 require_relative '../../app/models/token_generator'
+require_relative '../helpers/api_token_helper'
 
 describe TokenGeneratorsController do
 
   include Rack::Test::Methods
+  include ApiTokenHelper
 
   before do
     @generator1 = TokenGenerator.create!(
@@ -19,6 +21,7 @@ describe TokenGeneratorsController do
         secret: SecureRandom.uuid,
         token_ttl: 60
     )
+    add_api_header
   end
 
   def app
