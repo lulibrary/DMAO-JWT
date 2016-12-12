@@ -12,4 +12,17 @@ class TokenGeneratorsController < ApiController
 
   end
 
+  get '/:id' do
+
+    begin
+      generator = TokenGenerator.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      halt 404, json({errors: {token_generator_id: "No token generator found with id #{params[:id]}"}})
+    end
+
+    status 200
+    json generator
+
+  end
+
 end

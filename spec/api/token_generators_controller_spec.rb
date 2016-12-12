@@ -55,4 +55,43 @@ describe TokenGeneratorsController do
 
   end
 
+  it 'returns 404 when token generator cannot be found by id' do
+    get '/0'
+    assert_equal 404, last_response.status
+  end
+
+  it 'returns error message on 404 response when token generator cannot be found by id' do
+    get '/0'
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["token_generator_id"]
+
+    assert_equal parsed_body["errors"]["token_generator_id"], "No token generator found with id 0"
+  end
+
+  it 'returns 200 success when getting token generator details' do
+    get "/#{@generator1.id}"
+    assert_equal 200, last_response.status
+  end
+
+  it "returns details of token generator in response when generator found by id" do
+
+    get "/#{@generator1.id}"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generator"]
+
+    generator = parsed_body["token_generator"]
+
+    assert_equal generator["id"], @generator1.id
+    assert_equal generator["name"], @generator1.name
+    assert_equal generator["description"], @generator1.description
+    assert_equal generator["token_ttl"], @generator1.token_ttl
+
+    refute generator["secret"]
+
+  end
+
 end
