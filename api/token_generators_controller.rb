@@ -78,6 +78,25 @@ class TokenGeneratorsController < ApiController
 
   end
 
+  delete '/:id' do
+
+    begin
+      generator = TokenGenerator.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      halt 404, json({errors: {token_generator_id: "No token generator found with id #{params[:id]}"}})
+    end
+
+    if generator.destroy
+      status 200
+      json ""
+    else
+      status 422
+      error_response = {errors: {token_generator: "Error deleting token generator with id #{params[:id]}"}}
+      json error_response
+    end
+
+  end
+
   private
 
   def request_data

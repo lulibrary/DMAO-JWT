@@ -235,4 +235,43 @@ describe TokenGeneratorsController do
 
   end
 
+  it "returns 404 when generator id cannot be found for delete" do
+    delete '/0'
+    assert_equal 404, last_response.status
+  end
+
+  it "returns 200 when generator with id has successfully been deleted" do
+    delete "/#{@generator1.id}"
+    assert_equal 200, last_response.status
+  end
+
+  it "returns empty response when generator with id has successfully been deleted" do
+    delete "/#{@generator1.id}"
+    assert_equal JSON.parse(last_response.body), ""
+  end
+
+  it "returns unprocessable when destroy fails" do
+    TokenGenerator.any_instance.expects(:destroy).once.returns(false)
+    delete "/#{@generator1.id}"
+    assert_equal 422, last_response.status
+  end
+
+  it "returns error message when error deleting system" do
+
+    TokenGenerator.any_instance.expects(:destroy).once.returns(false)
+
+    delete "/#{@generator1.id}"
+
+    parsed_body = JSON.parse last_response.body
+
+    assert parsed_body["errors"]
+
+    assert_equal parsed_body["errors"].length, 1
+
+    assert parsed_body["errors"]["token_generator"]
+
+    assert_equal parsed_body["errors"]["token_generator"], "Error deleting token generator with id #{@generator1.id}"
+
+  end
+
 end
