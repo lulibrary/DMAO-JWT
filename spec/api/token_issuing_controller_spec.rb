@@ -24,11 +24,36 @@ describe TokenIssuingController do
         secret: SecureRandom.uuid,
         token_ttl: 60
     )
-    add_api_header
+
+    token = generate_api_token
+    token.roles << :issue_tokens
+    token.save
+    add_api_token_header token.token
   end
 
   def app
     TokenIssuingController
+  end
+
+  it 'returns 403 with error message if token does not have issue tokens role' do
+
+    add_api_header
+
+    attributes = {
+        subject: 'testing@test.com'
+    }
+
+    post "/#{@generator1.name}/tokens", attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 403, last_response.status
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to issue tokens", parsed_body["errors"]["api_token"]
+
   end
 
   it 'returns 404 with error message when requesting token from generator that does not exist' do

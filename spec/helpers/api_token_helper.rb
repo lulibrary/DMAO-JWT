@@ -10,4 +10,8 @@ module ApiTokenHelper
     header 'Authorization', "Bearer #{generate_api_token.token}"
   end
 
+  def add_api_token_header token
+    header 'Authorization', "Bearer #{token}"
+  end
+
 end

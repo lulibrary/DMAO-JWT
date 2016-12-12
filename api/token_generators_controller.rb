@@ -5,6 +5,8 @@ class TokenGeneratorsController < ApiController
 
   get '/' do
 
+    # View Generator details
+
     generators = TokenGenerator.all
 
     status 200
@@ -14,6 +16,8 @@ class TokenGeneratorsController < ApiController
 
   get '/:id' do
 
+    # View generator details
+
     generator = find_generator_or_error params[:id]
 
     status 200
@@ -22,6 +26,8 @@ class TokenGeneratorsController < ApiController
   end
 
   post '/' do
+
+    # admin generators
 
     data = request_data
 
@@ -47,6 +53,8 @@ class TokenGeneratorsController < ApiController
 
   patch '/:id' do
 
+    # admin generators
+
     generator = find_generator_or_error params[:id]
 
     data = request_data
@@ -71,6 +79,8 @@ class TokenGeneratorsController < ApiController
   end
 
   delete '/:id' do
+
+    # admin generators
 
     generator = find_generator_or_error params[:id]
 
