@@ -1,5 +1,8 @@
 require 'jwt'
 require_relative '../app/models/token_generator'
+require_relative '../app/errors/invalid_custom_claims_attr'
+require_relative '../app/errors/invalid_token_issuer_name'
+require_relative '../app/errors/invalid_token_subject'
 
 class TokenIssuer
 
