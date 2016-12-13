@@ -6,6 +6,8 @@ class TokenIssuingController < ApiController
 
   post '/:name/tokens' do
 
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :issue_tokens
+
     begin
       generator = TokenGenerator.find_by!(name: params[:name])
       data = request_data
