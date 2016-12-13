@@ -5,7 +5,7 @@ class TokenGeneratorsController < ApiController
 
   get '/' do
 
-    # View Generator details
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :view_generator_details
 
     generators = TokenGenerator.all
 
@@ -16,7 +16,7 @@ class TokenGeneratorsController < ApiController
 
   get '/:id' do
 
-    # View generator details
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :view_generator_details
 
     generator = find_generator_or_error params[:id]
 
@@ -27,7 +27,7 @@ class TokenGeneratorsController < ApiController
 
   post '/' do
 
-    # admin generators
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
 
     data = request_data
 
@@ -53,7 +53,7 @@ class TokenGeneratorsController < ApiController
 
   patch '/:id' do
 
-    # admin generators
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
 
     generator = find_generator_or_error params[:id]
 
@@ -80,7 +80,7 @@ class TokenGeneratorsController < ApiController
 
   delete '/:id' do
 
-    # admin generators
+    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
 
     generator = find_generator_or_error params[:id]
 

@@ -21,7 +21,6 @@ describe TokenGeneratorsController do
         secret: SecureRandom.uuid,
         token_ttl: 60
     )
-    add_api_header
   end
 
   def app
@@ -29,11 +28,13 @@ describe TokenGeneratorsController do
   end
 
   it 'returns success response when getting list of token generators' do
+    add_view_generators_token
     get '/'
     assert_equal 200, last_response.status
   end
 
   it 'returns list of all token generators' do
+    add_view_generators_token
     get '/'
     parsed_body = JSON.parse(last_response.body)
     assert parsed_body["token_generators"]
@@ -41,7 +42,7 @@ describe TokenGeneratorsController do
   end
 
   it 'returns details of token generator in response' do
-
+    add_view_generators_token
     get '/'
     parsed_body = JSON.parse(last_response.body)
 
@@ -59,11 +60,13 @@ describe TokenGeneratorsController do
   end
 
   it 'returns 404 when token generator cannot be found by id' do
+    add_view_generators_token
     get '/0'
     assert_equal 404, last_response.status
   end
 
   it 'returns error message on 404 response when token generator cannot be found by id' do
+    add_view_generators_token
     get '/0'
     parsed_body = JSON.parse(last_response.body)
 
@@ -74,11 +77,13 @@ describe TokenGeneratorsController do
   end
 
   it 'returns 200 success when getting token generator details' do
+    add_view_generators_token
     get "/#{@generator1.id}"
     assert_equal 200, last_response.status
   end
 
   it "returns details of token generator in response when generator found by id" do
+    add_view_generators_token
 
     get "/#{@generator1.id}"
 
@@ -99,6 +104,8 @@ describe TokenGeneratorsController do
 
   it 'returns created response when successfully creates a token generator' do
 
+    add_admin_generators_token
+
     attributes = {
       name: 'testing3',
       description: 'Testing generator 3',
@@ -113,6 +120,8 @@ describe TokenGeneratorsController do
   end
 
   it 'returns token generator object when successfully creates a token generator' do
+
+    add_admin_generators_token
 
     attributes = {
         name: 'testing3',
@@ -138,6 +147,8 @@ describe TokenGeneratorsController do
   end
 
   it 'returns 422 unprocessable with errors when trying to create generator with existing name' do
+
+    add_admin_generators_token
 
     attributes = {
         name: 'testing1',
@@ -165,11 +176,13 @@ describe TokenGeneratorsController do
   end
 
   it "returns 404 when generator id cannot be found for update" do
+    add_admin_generators_token
     patch '/0'
     assert_equal 404, last_response.status
   end
 
   it "returns 404 with error object when generator id cannot be found for update" do
+    add_admin_generators_token
     patch '/0'
     parsed_body = JSON.parse(last_response.body)
     error_object = {"token_generator_id" => "No token generator found with id 0"}
@@ -177,6 +190,8 @@ describe TokenGeneratorsController do
   end
 
   it "returns 422 unprocessable when invalid or empty attributes for token generator update" do
+
+    add_admin_generators_token
 
     update_attributes = {
         invalid_key: "testing"
@@ -189,6 +204,8 @@ describe TokenGeneratorsController do
   end
 
   it "returns error message when invalid or empty attributes for token generator update" do
+
+    add_admin_generators_token
 
     update_attributes = {
         invalid_key: "testing"
@@ -205,6 +222,8 @@ describe TokenGeneratorsController do
   end
 
   it "returns 422 unprocessable with error message when unable to update token generator" do
+
+    add_admin_generators_token
 
     update_attributes = {
         description: 'Testing Generator 1 updated'
@@ -223,6 +242,8 @@ describe TokenGeneratorsController do
 
   it "returns 200 okay with token generator when successfully updating a token generator" do
 
+    add_admin_generators_token
+
     update_attributes = {
         description: 'Token Generator 1 updated'
     }
@@ -239,27 +260,33 @@ describe TokenGeneratorsController do
   end
 
   it "returns 404 when generator id cannot be found for delete" do
+    add_admin_generators_token
     delete '/0'
     assert_equal 404, last_response.status
   end
 
   it "returns 200 when generator with id has successfully been deleted" do
+    add_admin_generators_token
     delete "/#{@generator1.id}"
     assert_equal 200, last_response.status
   end
 
   it "returns empty response when generator with id has successfully been deleted" do
+    add_admin_generators_token
     delete "/#{@generator1.id}"
     assert_equal JSON.parse(last_response.body), ""
   end
 
   it "returns unprocessable when destroy fails" do
+    add_admin_generators_token
     TokenGenerator.any_instance.expects(:destroy).once.returns(false)
     delete "/#{@generator1.id}"
     assert_equal 422, last_response.status
   end
 
   it "returns error message when error deleting system" do
+
+    add_admin_generators_token
 
     TokenGenerator.any_instance.expects(:destroy).once.returns(false)
 
@@ -275,6 +302,22 @@ describe TokenGeneratorsController do
 
     assert_equal parsed_body["errors"]["token_generator"], "Error deleting token generator with id #{@generator1.id}"
 
+  end
+
+  private
+
+  def add_view_generators_token
+    token = generate_api_token
+    token.roles << :view_generator_details
+    token.save
+    add_api_token_header token.token
+  end
+
+  def add_admin_generators_token
+    token = generate_api_token
+    token.roles << :admin_generators
+    token.save
+    add_api_token_header token.token
   end
 
 end
