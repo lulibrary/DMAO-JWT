@@ -5,29 +5,29 @@ class TokenGeneratorsController < ApiController
 
   get '/' do
 
-    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :view_generator_details
+    halt 403, json({errors: {api_token: "You are not able to view list of token generators"}}) unless @api_token.has_role? :view_generator_details
 
     generators = TokenGenerator.all
 
     status 200
-    json generators, { root: 'token_generators' }
+    json generators, { root: 'token_generators', scope: api_token }
 
   end
 
   get '/:id' do
 
-    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :view_generator_details
+    halt 403, json({errors: {api_token: "You are not able to view token generator details"}}) unless @api_token.has_role? :view_generator_details
 
     generator = find_generator_or_error params[:id]
 
     status 200
-    json generator
+    json generator, { scope: api_token }
 
   end
 
   post '/' do
 
-    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
+    halt 403, json({errors: {api_token: "You are not able to create token generators"}}) unless @api_token.has_role? :admin_generators
 
     data = request_data
 
@@ -42,7 +42,7 @@ class TokenGeneratorsController < ApiController
 
     if generator.save
       status 201
-      json generator
+      json generator, { scope: api_token }
     else
       status 422
       error_response = {errors: generator.errors}
@@ -53,7 +53,7 @@ class TokenGeneratorsController < ApiController
 
   patch '/:id' do
 
-    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
+    halt 403, json({errors: {api_token: "You are not able to update token generators"}}) unless @api_token.has_role? :admin_generators
 
     generator = find_generator_or_error params[:id]
 
@@ -69,7 +69,7 @@ class TokenGeneratorsController < ApiController
 
     if generator.update data
       status 200
-      json generator
+      json generator, { scope: api_token }
     else
       status 422
       error_response = {errors: generator.errors}
@@ -80,7 +80,7 @@ class TokenGeneratorsController < ApiController
 
   delete '/:id' do
 
-    halt 403, json({errors: {api_token: "You are not able to issue tokens"}}) unless @api_token.has_role? :admin_generators
+    halt 403, json({errors: {api_token: "You are not able to delete token generators"}}) unless @api_token.has_role? :admin_generators
 
     generator = find_generator_or_error params[:id]
 

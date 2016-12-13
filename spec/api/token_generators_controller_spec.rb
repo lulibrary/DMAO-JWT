@@ -12,13 +12,13 @@ describe TokenGeneratorsController do
     @generator1 = TokenGenerator.create!(
         name: 'testing1',
         description: 'Testing generator 1',
-        secret: SecureRandom.uuid,
+        secret: SecureRandom.uuid.tr('-', ''),
         token_ttl: 3600
     )
     @generator2 = TokenGenerator.create!(
         name: 'testing2',
         description: 'Testing generator 2',
-        secret: SecureRandom.uuid,
+        secret: SecureRandom.uuid.tr('-', ''),
         token_ttl: 60
     )
   end
@@ -301,6 +301,184 @@ describe TokenGeneratorsController do
     assert parsed_body["errors"]["token_generator"]
 
     assert_equal parsed_body["errors"]["token_generator"], "Error deleting token generator with id #{@generator1.id}"
+
+  end
+
+  # AUTH API Token Permission checks
+
+  it "returns 403 if token is not able to view list of generators" do
+
+    add_api_header
+
+    get '/'
+
+    assert_equal 403, last_response.status
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to view list of token generators", parsed_body["errors"]["api_token"]
+
+  end
+
+  it "returns 403 if token is not able to view generator details" do
+
+    add_api_header
+
+    get "/#{@generator1.id}"
+
+    assert_equal 403, last_response.status
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to view token generator details", parsed_body["errors"]["api_token"]
+
+  end
+
+  it "returns 403 if token is not able to create token generator" do
+
+    add_api_header
+
+    attributes = {
+        name: 'testing3',
+        description: 'Testing generator 3',
+        secret: SecureRandom.uuid,
+        token_ttl: 3600
+    }
+
+    post '/', attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 403, last_response.status
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to create token generators", parsed_body["errors"]["api_token"]
+
+  end
+
+  it "returns 403 if token is not able to update token generator" do
+
+    add_api_header
+
+    update_attributes = {
+        description: 'Token Generator 1 updated'
+    }
+
+    patch "/#{@generator1.id}", update_attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to update token generators", parsed_body["errors"]["api_token"]
+
+  end
+
+  it "returns 403 if token is not able to delete token generator" do
+
+    add_api_header
+
+    delete "/#{@generator1.id}"
+
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["errors"]
+    assert parsed_body["errors"]["api_token"]
+
+    assert_equal "You are not able to delete token generators", parsed_body["errors"]["api_token"]
+
+  end
+
+  it "does not return secret in json response for token generators list if api token does not have permission" do
+
+    add_view_generators_token
+    get '/'
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generators"]
+
+    generator = parsed_body["token_generators"][0]
+
+    assert_equal generator["id"], @generator1.id
+    assert_equal generator["name"], @generator1.name
+    assert_equal generator["description"], @generator1.description
+    assert_equal generator["token_ttl"], @generator1.token_ttl
+
+    refute generator["secret"]
+
+  end
+
+  it "returns secret in json response for token generators list if api token has permission to view it" do
+
+    token = generate_api_token
+    token.roles << :view_generator_details
+    token.roles << :view_generator_secret
+    token.save
+    add_api_token_header token.token
+
+    get '/'
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generators"]
+
+    generator = parsed_body["token_generators"][0]
+
+    assert_equal generator["id"], @generator1.id
+    assert_equal generator["name"], @generator1.name
+    assert_equal generator["description"], @generator1.description
+    assert_equal generator["token_ttl"], @generator1.token_ttl
+    assert_equal generator["secret"], @generator1.secret
+
+  end
+
+  it "does not return secret in json response for token generator details if api token does not have permission" do
+
+    add_view_generators_token
+    get "/#{@generator1.id}"
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generator"]
+
+    generator = parsed_body["token_generator"]
+
+    assert_equal generator["id"], @generator1.id
+    assert_equal generator["name"], @generator1.name
+    assert_equal generator["description"], @generator1.description
+    assert_equal generator["token_ttl"], @generator1.token_ttl
+
+    refute generator["secret"]
+
+  end
+
+  it "returns secret in json response for token generator details if api token has permission to view it" do
+
+    token = generate_api_token
+    token.roles << :view_generator_details
+    token.roles << :view_generator_secret
+    token.save
+    add_api_token_header token.token
+
+    get "/#{@generator1.id}"
+    parsed_body = JSON.parse(last_response.body)
+
+    assert parsed_body["token_generator"]
+
+    generator = parsed_body["token_generator"]
+
+    assert_equal generator["id"], @generator1.id
+    assert_equal generator["name"], @generator1.name
+    assert_equal generator["description"], @generator1.description
+    assert_equal generator["token_ttl"], @generator1.token_ttl
+    assert_equal generator["secret"], @generator1.secret
 
   end
 
