@@ -11,7 +11,7 @@ class TokenIssuingController < ApiController
     begin
       generator = TokenGenerator.find_by!(name: params[:name])
       data = request_data
-      token = TokenIssuer.issue generator, {sub: data["subject"]}, data["custom_claims"]
+      token = TokenIssuer.issue generator, {sub: data["subject"]}, data["custom_claims"], data["token_ttl"]
     rescue ActiveRecord::RecordNotFound
       halt 404, json({errors: {token_generator: "No token generator found with name #{params[:name]}"}})
     rescue InvalidTokenIssuerName, InvalidCustomClaimsAttr

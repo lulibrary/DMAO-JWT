@@ -6,19 +6,21 @@ require_relative '../app/errors/invalid_token_subject'
 
 class TokenIssuer
 
-  def self.issue token_generator, reserved_claims, custom_claims
+  def self.issue token_generator, reserved_claims, custom_claims, token_ttl
     issuer = TokenIssuer.new
-    issuer.issue_token token_generator, reserved_claims, custom_claims
+    issuer.issue_token token_generator, reserved_claims, custom_claims, token_ttl
   end
 
-  def issue_token token_generator, reserved_claims, custom_claims
+  def issue_token token_generator, reserved_claims, custom_claims, token_ttl
 
     validate_token_issuer_name
     validate_custom_claims_attr
 
     raise InvalidTokenSubject if reserved_claims[:sub].nil? || reserved_claims[:sub].empty?
 
-    payload = generate_common_payload reserved_claims[:sub], token_generator.name, token_generator.token_ttl
+    token_ttl = token_ttl.nil? || token_ttl.empty? ? token_generator.token_ttl: token_ttl
+
+    payload = generate_common_payload reserved_claims[:sub], token_generator.name, token_ttl
 
     payload = merge_custom_claims payload, custom_claims
 
