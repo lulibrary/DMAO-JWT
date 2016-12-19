@@ -18,7 +18,9 @@ class TokenIssuer
 
     raise InvalidTokenSubject if reserved_claims[:sub].nil? || reserved_claims[:sub].empty?
 
-    token_ttl = token_ttl.nil? || token_ttl.empty? ? token_generator.token_ttl: token_ttl
+    token_ttl = token_ttl.to_s
+
+    token_ttl = token_ttl.nil? || token_ttl.empty? ? token_generator.token_ttl : token_ttl.to_i
 
     payload = generate_common_payload reserved_claims[:sub], token_generator.name, token_ttl
 

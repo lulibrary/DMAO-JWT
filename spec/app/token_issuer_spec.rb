@@ -170,4 +170,73 @@ describe TokenIssuer do
 
   end
 
+  it 'should set token ttl to that specified in token generator when nil is passed to issue' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 123576,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, nil
+
+  end
+
+  it 'should set token ttl to that specified in token generator when empty string is passed to issue' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 123576,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, ""
+
+  end
+
+  it 'should set token ttl to that specified when calling issue method' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 124456,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, 1000
+
+  end
+
 end

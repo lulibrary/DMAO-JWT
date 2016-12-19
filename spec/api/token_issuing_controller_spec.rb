@@ -181,4 +181,61 @@ describe TokenIssuingController do
 
   end
 
+  it 'returns success response with jwt when requesting token with specific token ttl and without custom claims' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+
+    attributes = {
+        subject: 'testing@test.com',
+        token_ttl: 1000
+    }
+
+    post "/#{@generator1.name}/tokens", attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 200, last_response.status
+
+    assert JSON.parse(last_response.body)["token"]
+
+    token = JSON.parse(last_response.body)["token"]
+
+    decoded_token = JWT.decode token, @generator1.secret, true, { :algorithm => 'HS256' }
+
+    assert decoded_token[0]["sub"]
+    assert_equal 'testing@test.com', decoded_token[0]["sub"]
+
+    assert_equal 123456, decoded_token[0]["iat"]
+    assert_equal 124456, decoded_token[0]["exp"]
+
+    refute decoded_token[0]["dmao"]
+
+  end
+
+  it 'returns success response with jwt when requesting token without custom claims and token ttl' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+
+    attributes = {
+        subject: 'testing@test.com'
+    }
+
+    post "/#{@generator1.name}/tokens", attributes.to_json, "CONTENT_TYPE" => "application/json"
+
+    assert_equal 200, last_response.status
+
+    assert JSON.parse(last_response.body)["token"]
+
+    token = JSON.parse(last_response.body)["token"]
+
+    decoded_token = JWT.decode token, @generator1.secret, true, { :algorithm => 'HS256' }
+
+    assert decoded_token[0]["sub"]
+    assert_equal 'testing@test.com', decoded_token[0]["sub"]
+
+    assert_equal 123456, decoded_token[0]["iat"]
+    assert_equal 123456 + @generator1.token_ttl , decoded_token[0]["exp"]
+
+    refute decoded_token[0]["dmao"]
+
+  end
+
 end
