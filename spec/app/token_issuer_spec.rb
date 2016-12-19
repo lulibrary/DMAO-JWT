@@ -24,7 +24,7 @@ describe TokenIssuer do
     ENV['TOKEN_ISSUER_NAME'] = ""
 
     assert_raises "InvalidTokenIssuerName" do
-      TokenGenerator.issue @generator, {}, {}
+      TokenGenerator.issue @generator, {}, {}, nil
     end
 
     ENV['TOKEN_ISSUER_NAME'] = previous_env_value
@@ -38,7 +38,7 @@ describe TokenIssuer do
     ENV['CUSTOM_CLAIMS_ATTR'] = ""
 
     assert_raises "InvalidCustomClaimsAttr" do
-      TokenGenerator.issue @generator, {}, {}
+      TokenGenerator.issue @generator, {}, {}, nil
     end
 
     ENV['CUSTOM_CLAIMS_ATTR'] = previous_env_value
@@ -48,7 +48,7 @@ describe TokenIssuer do
   it 'should raise invalid token subject error if sub is not defined in reserved claims' do
 
     assert_raises "InvalidTokenSubject" do
-      TokenGenerator.issue @generator, {}, {}
+      TokenGenerator.issue @generator, {}, {}, nil
     end
 
   end
@@ -57,7 +57,7 @@ describe TokenIssuer do
 
     TokenIssuer.any_instance.expects(:issue_token).once
 
-    TokenIssuer.issue @generator, {}, {}
+    TokenIssuer.issue @generator, {}, {}, nil
 
   end
 
@@ -77,7 +77,7 @@ describe TokenIssuer do
 
     TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
-    TokenIssuer.issue @generator, {sub: 'test'}, {}
+    TokenIssuer.issue @generator, {sub: 'test'}, {}, nil
 
   end
 
@@ -97,7 +97,7 @@ describe TokenIssuer do
 
     TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
-    TokenIssuer.issue @generator, {sub: 'test'}, nil
+    TokenIssuer.issue @generator, {sub: 'test'}, nil, nil
 
   end
 
@@ -120,7 +120,7 @@ describe TokenIssuer do
 
     TokenIssuer.any_instance.expects(:generate_token).with(payload, 'abcdefg').once
 
-    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, nil
 
   end
 
@@ -143,7 +143,7 @@ describe TokenIssuer do
 
     JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
 
-    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, nil
 
   end
 
@@ -166,7 +166,76 @@ describe TokenIssuer do
 
     JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
 
-    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, nil
+
+  end
+
+  it 'should set token ttl to that specified in token generator when nil is passed to issue' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 123576,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, nil
+
+  end
+
+  it 'should set token ttl to that specified in token generator when empty string is passed to issue' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 123576,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, ""
+
+  end
+
+  it 'should set token ttl to that specified when calling issue method' do
+
+    Time.expects(:now).at_least_once.returns('123456')
+    SecureRandom.expects(:uuid).at_least_once.returns('abcd-1234')
+
+    payload = {
+        iss: 'dmao_jwt',
+        sub: 'test',
+        iat: 123456,
+        exp: 124456,
+        aud: 'testing1',
+        jti: 'abcd1234',
+        ENV['CUSTOM_CLAIMS_ATTR'] => {
+            'test': 'test value'
+        }
+    }
+
+    JWT.expects(:encode).once.with(payload, 'abcdefg', 'HS256')
+
+    TokenIssuer.issue @generator, {sub: 'test'}, {'test': 'test value'}, 1000
 
   end
 
