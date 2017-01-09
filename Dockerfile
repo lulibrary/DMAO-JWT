@@ -1,5 +1,4 @@
-FROM ruby:2.3.1-slim
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev
+FROM dmaonline/ruby-base:2.3.1
 
 ENV APP_ROOT /var/www/docker-sinatra
 RUN mkdir -p $APP_ROOT
