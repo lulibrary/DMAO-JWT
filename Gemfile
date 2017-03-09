@@ -26,6 +26,9 @@ gem 'jwt'
 
 gem 'role_model'
 
+# For Exception logging
+gem "sentry-raven"
+
 group :development, :test do
   gem 'byebug'
 end
