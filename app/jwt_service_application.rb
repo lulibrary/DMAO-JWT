@@ -11,6 +11,7 @@ class JWTServiceApplication < Sinatra::Base
 
   set :database, {
       adapter: ENV['DB_ADAPTER'],
+      pool: ENV.fetch("MAX_THREADS") { 5 }.to_i,
       host: ENV['DB_HOST'],
       username: ENV['DB_USERNAME'],
       password: ENV['DB_PASSWORD'],
