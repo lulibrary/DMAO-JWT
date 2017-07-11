@@ -60,11 +60,8 @@ volumes:[
       stage ('Push Images') {
         container('docker') {
           docker.withRegistry('https://registry.dmao.org', 'dmao-registry-credentials') {
-              app.push("build-${env.BUILD_NUMBER}")
+              app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
               app.push("dev")
-              if(env.BRANCH_NAME=="master"){
-                app.push("master-${env.BUILD_NUMBER}")
-              }
           }
         }
       }
@@ -78,13 +75,15 @@ volumes:[
       }
 
     } catch (error) {
+      
+      slackSend channel: '#dmao-dev', color: 'danger', message: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+
       container ('docker') {
         sh "echo 'Cleaning up containers'"
         sh 'docker stop postgres && docker rm postgres'
         sh 'docker network rm test_ci'
       }
-      slackSend channel: '#dmao-dev', color: 'danger', message: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
-
+      
       throw error
     }
   }
