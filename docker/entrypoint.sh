@@ -7,3 +7,5 @@ if [[ -z "${DB_SSL_KEY_PATH}" ]]; then
 else
   chmod 600 $DB_SSL_KEY_PATH
 fi
+
+exec "$@"
