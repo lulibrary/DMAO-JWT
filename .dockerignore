@@ -1,0 +1,4 @@
+setup_docker_tests.sh
+.env.example
+docker-compose.yml
+Jenkinsfile
